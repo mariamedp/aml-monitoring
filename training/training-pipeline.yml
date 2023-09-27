@@ -1,0 +1,47 @@
+$schema: https://azuremlschemas.azureedge.net/latest/pipelineJob.schema.json
+type: pipeline
+
+description: Training pipeline
+display_name: energy-training-pipeline
+experiment_name: energy-training
+
+inputs:
+  training_dataset:  # Created as data asset in AML
+    type: uri_folder
+    path: azureml:energy-demand-training:1
+  model_name: "energy-model"
+
+# outputs:
+#   model:
+
+settings:
+  default_compute: azureml:cpu-cluster
+
+jobs:
+
+  train_job:
+    display_name: train
+    type: command
+    inputs:
+      training_data: ${{parent.inputs.training_dataset}}
+    outputs:
+      model_path:
+    environment: azureml:AzureML-sklearn-1.0-ubuntu20.04-py38-cpu@latest
+    code: .
+    command: >-
+      python train.py \
+        --data-path ${{inputs.training_data}} \
+        --model-path ${{outputs.model_path}}
+
+  register_job:
+    display_name: register
+    type: command
+    inputs:
+      model_path: ${{parent.jobs.train_job.outputs.model_path}}
+      model_name: ${{parent.inputs.model_name}}
+    environment: azureml:AzureML-sklearn-1.0-ubuntu20.04-py38-cpu@latest
+    code: .
+    command: >-
+      python register.py \
+        --model-path ${{inputs.model_path}} \
+        --model-name ${{inputs.model_name}}

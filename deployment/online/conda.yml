@@ -1,0 +1,12 @@
+channels:
+- conda-forge
+dependencies:
+- python=3.8
+- pip
+- pip:
+  - azureml-inference-server-http
+  - azureml-contrib-services
+  - azureml-ai-monitoring
+  - mlflow
+  - scikit-learn==1.0.2
+name: energy_inference_env

@@ -1,0 +1,11 @@
+
+az ml job create --file training/training-pipeline.yml 
+
+az ml online-endpoint create --file deployment/online/online-endpoint.yml
+az ml online-deployment create --file deployment/online/online-deployment.yml
+
+az ml online-endpoint update --file deployment/online/online-endpoint.yml
+az ml online-deployment update --file deployment/online/online-deployment.yml
+
+az ml schedule create --file deployment/online/online-monitor.yml
+

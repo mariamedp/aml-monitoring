@@ -1,0 +1,19 @@
+$schema: http://azureml/sdk-2-0/Schedule.json
+name: energy_demand_online_monitoring
+display_name: Energy demand - online monitoring
+description: Energy demand model monitoring for online endpoint
+
+trigger:
+  type: recurrence
+  frequency: day  # Can be minute, hour, day, week, month
+  interval: 1
+  schedule:  # In UTC 
+    hours: 9
+    minutes: 15
+
+create_monitor:
+  compute:
+    instance_type: standard_e4s_v3  # Spark compute for monitoring job
+    runtime_version: 3.2
+  monitoring_target:
+    endpoint_deployment_id: azureml:energy-demand-online-endpoint:blue-dp
