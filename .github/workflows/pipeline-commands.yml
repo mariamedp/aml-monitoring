@@ -1,0 +1,45 @@
+name: cli-commands
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "CLI ml action"
+        type: choice
+        required: true
+        options:
+          - train
+          - online_deployment_create
+          - online_deployment_update
+          - batch_deployment_create
+          - batch_deployment_update
+          - invoke_batch
+      cli_version:
+        description: "CLI ml extension version"
+        type: string
+        required: false
+        default: 2.19.0
+
+
+jobs:
+
+  setup:
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - run: |
+          echo "HELLO"
+      - run: |
+          echo "${{ secrets.AML_SP_CLIENT }}"
+      - run: |
+          echo "${{ env.AML_WORKSPACE_NAME }}"
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: '{
+            "clientId": "${{ secrets.AML_SP_CLIENT }}",
+            "clientSecret": "${{ secrets.AML_SP_SECRET }}",
+            "subscriptionId": "${{ secrets.AML_SUBSCRIPTION }}",
+            "tenantId": "${{ secrets.AML_TENANT }}"
+          }'
