@@ -1,4 +1,4 @@
-name: train-cli
+name: online-monitor-cli
 
 on:
   workflow_dispatch:
@@ -12,7 +12,7 @@ on:
 
 jobs:
 
-  train:
+  online_monitor:
     runs-on: ubuntu-latest
     environment: dev
     steps:
@@ -38,8 +38,8 @@ jobs:
         uses: actions/checkout@v4
 
 
-      #############
-      ##  Train  ##
-      #############
-      - name: "Train"
-        run: az ml job create --file $GITHUB_WORKSPACE/training/training-pipeline.yml 
+      #############################
+      ##  Deploy online monitor  ##
+      #############################
+      - name: "Deploy monitor"
+        run: az ml schedule create --file $GITHUB_WORKSPACE/deployment/online/online-monitor.yml --debug
