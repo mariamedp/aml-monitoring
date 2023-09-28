@@ -27,19 +27,45 @@ jobs:
     runs-on: ubuntu-latest
     environment: dev
     steps:
-      - run: |
-          echo "HELLO"
-      - run: |
-          echo "${{ secrets.AML_SP_CLIENT }}"
-      - run: |
-          echo "${{ env.AML_WORKSPACE_NAME }}"
-
+      - name: Checkout repo
+        uses: actions/checkout@v4
+      - name: "Install CLI ml ${{ inputs.cli_version }}"
+        run: |
+          az extension add --name ml --version ${{ inputs.cli_version }} -y
       - name: Azure Login
         uses: azure/login@v1
         with:
           creds: '{
             "clientId": "${{ secrets.AML_SP_CLIENT }}",
             "clientSecret": "${{ secrets.AML_SP_SECRET }}",
-            "subscriptionId": "${{ secrets.AML_SUBSCRIPTION }}",
-            "tenantId": "${{ secrets.AML_TENANT }}"
+            "subscriptionId": "${{ secrets.AML_SUBSCRIPTION_ID }}",
+            "tenantId": "${{ secrets.AML_TENANT_ID }}"
           }'
+      - name: "Set default AML workspace"
+        run: az configure --defaults workspace="${{ vars.AML_WORKSPACE_NAME }}" group="${{ vars.AML_RG_NAME }}"
+
+  az_ml_setup:
+    runs-on: ubuntu-latest
+    environment: dev
+    needs: setup
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+      # - name: az_ml_setup
+      #   uses: mariamedp/aml-monitoring/.github/actions/az-ml-setup-action@test-gh-action
+      #   with:
+      #     cli_version: ${{ inputs.cli_version }}
+      - name: az_ml_setup
+        uses: ./.github/actions/az-ml-setup-action
+        env: ${{vars}}
+        with:
+          cli_version: ${{ inputs.cli_version }}
+
+  # train:
+  #   if: ${{ inputs.action == 'train' }}
+  #   runs-on: ubuntu-latest
+  #   environment: dev
+  #   needs: setup
+  #   steps:
+  #     - run: |
+  #         az ml job create --file $GITHUB_WORKSPACE/training/training-pipeline.yml 

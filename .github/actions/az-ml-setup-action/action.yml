@@ -1,0 +1,44 @@
+name: az-ml-setup
+description: az ml CLI extension setup
+
+inputs:
+  cli_version:
+    description: "CLI ml extension version"
+    required: true
+
+# outputs:
+#   random-number:
+#     description: "Random number"
+#     value: ${{ steps.random-number-generator.outputs.random-number }}
+
+runs:
+  using: "composite"
+  steps:
+
+    - name: Checkout repo
+      uses: actions/checkout@v4
+
+    - name: "Install CLI ml ${{ inputs.cli_version }}"
+      shell: bash
+      run: az extension add --name ml --version ${{ inputs.cli_version }} -y
+
+    # - name: Azure Login
+    #   uses: azure/login@v1
+    #   with:
+    #     creds: '{
+    #       "clientId": "${{ secrets.AML_SP_CLIENT }}",
+    #       "clientSecret": "${{ secrets.AML_SP_SECRET }}",
+    #       "subscriptionId": "${{ secrets.AML_SUBSCRIPTION_ID }}",
+    #       "tenantId": "${{ secrets.AML_TENANT_ID }}"
+    #     }'
+
+    - name: "test"
+      shell: bash
+      run: echo az configure --defaults workspace=$AML_WORKSPACE_NAME group=$AML_RG_NAME
+
+    - name: "Set default AML workspace"
+      shell: bash
+      run: az configure --defaults workspace=$AML_WORKSPACE_NAME group=$AML_RG_NAME
+
+    # - run: echo "${{ github.action_path }}" >> $GITHUB_PATH
+    #   shell: bash
