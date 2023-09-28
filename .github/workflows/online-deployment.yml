@@ -1,0 +1,70 @@
+name: cli-online-deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      cli_version:
+        description: "CLI ml extension version"
+        type: string
+        required: false
+        default: 2.19.1
+      action:
+        description: "Deployment action"
+        type: choice
+        required: false
+        options:
+          - create
+          - update
+        default: create
+
+
+jobs:
+
+  online_monitor:
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+
+      #############
+      ##  Setup  ##
+      #############
+      - name: "[Setup] Install CLI ml ${{ inputs.cli_version }}"
+        run: |
+          az extension add --name ml --version ${{ inputs.cli_version }} -y
+      - name: "[Setup] Azure login"
+        uses: azure/login@v1
+        with:
+          creds: '{
+            "clientId": "${{ secrets.AML_SP_CLIENT }}",
+            "clientSecret": "${{ secrets.AML_SP_SECRET }}",
+            "subscriptionId": "${{ secrets.AML_SUBSCRIPTION_ID }}",
+            "tenantId": "${{ secrets.AML_TENANT_ID }}"
+          }'
+      - name: "[Setup] Set default AML workspace"
+        run: az configure --defaults workspace="${{ vars.AML_WORKSPACE_NAME }}" group="${{ vars.AML_RG_NAME }}"
+      - name: "[Setup] Checkout repo"
+        uses: actions/checkout@v4
+
+
+      ###########################################
+      ##  Deploy online endpoint & deployment  ##
+      ###########################################
+      - name: "Create endpoint"
+        if: ${{ inputs.action == 'create'}}
+        run: az ml online-endpoint create --file deployment/online/online-endpoint.yml --debug
+      - name: "Create deployment v1"
+        if: ${{ inputs.action == 'create'}}
+        run: az ml online-deployment create --file deployment/online/online-deployment.yml --debug
+      - name: "Create deployment v2"
+        if: ${{ inputs.action == 'create'}}
+        run: az ml online-deployment create --file deployment/online/online-deployment-default-mdc.yml --debug
+
+      - name: "Update endpoint"
+        if: ${{ inputs.action == 'update'}}
+        run: az ml online-endpoint update --file deployment/online/online-endpoint.yml --debug
+      - name: "Update deployment v1"
+        if: ${{ inputs.action == 'update'}}
+        run: az ml online-deployment update --file deployment/online/online-deployment.yml --debug
+      - name: "Update deployment v2"
+        if: ${{ inputs.action == 'update'}}
+        run: az ml online-deployment update --file deployment/online/online-deployment-default-mdc.yml --debug

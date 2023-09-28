@@ -1,5 +1,5 @@
 $schema: http://azureml/sdk-2-0/Schedule.json
-name: energy_demand_online_monitoring
+name: energy_demand_online_monitoring_defstore
 description: Energy demand model monitoring for online endpoint
 
 trigger:
@@ -15,4 +15,4 @@ create_monitor:
     instance_type: standard_e4s_v3  # Spark compute for monitoring job
     runtime_version: 3.2
   monitoring_target:
-    endpoint_deployment_id: azureml:energy-demand-online-endpoint:blue-dp
+    endpoint_deployment_id: azureml:energy-demand-online-endpoint:defstore-dp

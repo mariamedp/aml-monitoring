@@ -1,4 +1,4 @@
-name: train-cli
+name: cli-training
 
 on:
   workflow_dispatch:
@@ -7,7 +7,7 @@ on:
         description: "CLI ml extension version"
         type: string
         required: false
-        default: 2.19.0
+        default: 2.19.1
 
 
 jobs:
@@ -38,8 +38,8 @@ jobs:
         uses: actions/checkout@v4
 
 
-      #############
-      ##  Train  ##
-      #############
+      ################
+      ##  Training  ##
+      ################
       - name: "Train"
         run: az ml job create --file $GITHUB_WORKSPACE/training/training-pipeline.yml 

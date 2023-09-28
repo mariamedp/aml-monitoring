@@ -1,4 +1,4 @@
-name: online-monitor-cli
+name: cli-online-monitor
 
 on:
   workflow_dispatch:
@@ -7,7 +7,7 @@ on:
         description: "CLI ml extension version"
         type: string
         required: false
-        default: 2.19.0
+        default: 2.19.1
 
 
 jobs:
@@ -43,3 +43,5 @@ jobs:
       #############################
       - name: "Deploy monitor"
         run: az ml schedule create --file $GITHUB_WORKSPACE/deployment/online/online-monitor.yml --debug
+      - name: "Deploy monitor v2"
+        run: az ml schedule create --file $GITHUB_WORKSPACE/deployment/online/online-monitor-default-mdc.yml --debug
