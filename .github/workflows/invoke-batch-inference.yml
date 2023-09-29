@@ -2,17 +2,12 @@ name: invoke-batch-inference
 
 on:
   workflow_dispatch:
-    inputs:
-      cli_version:
-        description: "CLI ml extension version"
-        type: string
-        required: false
-        default: 2.19.1
-
+  schedule:
+    - cron: "30 23 * * *"  # min hour dom month dow
 
 jobs:
 
-  batch_deployment:
+  invoke_inference:
     runs-on: ubuntu-latest
     environment: dev
     steps:
@@ -20,9 +15,9 @@ jobs:
       #############
       ##  Setup  ##
       #############
-      - name: "[Setup] Install CLI ml ${{ inputs.cli_version }}"
+      - name: "[Setup] Install CLI ml 2.19.1"
         run: |
-          az extension add --name ml --version ${{ inputs.cli_version }} -y
+          az extension add --name ml --version 2.19.1 -y
       - name: "[Setup] Azure login"
         uses: azure/login@v1
         with:
@@ -42,17 +37,17 @@ jobs:
       ##  Invoke batch endpoint & deployment  ##
       ##########################################
       - name: "Invoke batch endpoint"
-        if: ${{ inputs.action == 'incoke'}}
         run: |
           # Simulate as if 2016 was current year
           year="2016"
           month=$(date +"%m")
           day=$(date +"%d")
-          hour=$(date +"%H")
-          filepath="daily_data/$year/$month/$day/$hour/"
-          filename="$year$month$day_$hour.csv"
-          az ml batch-endpoint invoke --name energy-demand-batch-endpoint \
-            --input-type uri_folder 
-            --input azureml://datastores/data/paths/energy_demand_azuremlexamples/$filepath/$filename
-            --output_path azureml://datastores/data/paths/energy_preds/$filepath/preds_$filename
+          filepath="$year/$month/$day"
+          filename=$year$month$day".csv"
+          datapath="azureml://datastores/data/paths/energy_demand_azuremlexamples"
+          az ml batch-endpoint invoke \
+            --name energy-demand-batch-endpoint --deployment-name batch-dp \
+            --input-type uri_folder \
+            --input $datapath/daily_features_data/$filepath/energy_features_$filename \
+            --output-path $datapath/daily_preds/$filepath/energy_preds_$filename \
             --debug

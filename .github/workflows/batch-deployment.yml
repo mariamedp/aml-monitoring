@@ -15,7 +15,6 @@ on:
         options:
           - create
           - update
-          - invoke
         default: create
 
 
