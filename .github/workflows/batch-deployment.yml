@@ -1,4 +1,4 @@
-name: cli-online-deployment
+name: cli-batch-deployment
 
 on:
   workflow_dispatch:
@@ -15,12 +15,13 @@ on:
         options:
           - create
           - update
+          - invoke
         default: create
 
 
 jobs:
 
-  online_deployment:
+  batch_deployment:
     runs-on: ubuntu-latest
     environment: dev
     steps:
@@ -46,25 +47,19 @@ jobs:
         uses: actions/checkout@v4
 
 
-      ###########################################
-      ##  Deploy online endpoint & deployment  ##
-      ###########################################
+      ##########################################
+      ##  Deploy batch endpoint & deployment  ##
+      ##########################################
       - name: "Create endpoint"
         if: ${{ inputs.action == 'create'}}
-        run: az ml online-endpoint create --file deployment/online/online-endpoint.yml --debug
-      - name: "Create deployment v1"
+        run: az ml batch-endpoint create --file deployment/batch/batch-endpoint.yml --debug
+      - name: "Create deployment"
         if: ${{ inputs.action == 'create'}}
-        run: az ml online-deployment create --file deployment/online/online-deployment.yml --debug
-      - name: "Create deployment v2"
-        if: ${{ inputs.action == 'create'}}
-        run: az ml online-deployment create --file deployment/online/online-deployment-default-mdc.yml --debug
+        run: az ml batch-deployment create --file deployment/batch/batch-deployment.yml --debug
 
       - name: "Update endpoint"
         if: ${{ inputs.action == 'update'}}
-        run: az ml online-endpoint update --file deployment/online/online-endpoint.yml --debug
-      - name: "Update deployment v1"
+        run: az ml batch-endpoint update --file deployment/batch/batch-endpoint.yml --debug
+      - name: "Update deployment"
         if: ${{ inputs.action == 'update'}}
-        run: az ml online-deployment update --file deployment/online/online-deployment.yml --debug
-      - name: "Update deployment v2"
-        if: ${{ inputs.action == 'update'}}
-        run: az ml online-deployment update --file deployment/online/online-deployment-default-mdc.yml --debug
+        run: az ml batch-deployment update --file deployment/batch/batch-deployment.yml --debug

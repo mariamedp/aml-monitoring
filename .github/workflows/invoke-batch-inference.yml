@@ -1,0 +1,58 @@
+name: invoke-batch-inference
+
+on:
+  workflow_dispatch:
+    inputs:
+      cli_version:
+        description: "CLI ml extension version"
+        type: string
+        required: false
+        default: 2.19.1
+
+
+jobs:
+
+  batch_deployment:
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+
+      #############
+      ##  Setup  ##
+      #############
+      - name: "[Setup] Install CLI ml ${{ inputs.cli_version }}"
+        run: |
+          az extension add --name ml --version ${{ inputs.cli_version }} -y
+      - name: "[Setup] Azure login"
+        uses: azure/login@v1
+        with:
+          creds: '{
+            "clientId": "${{ secrets.AML_SP_CLIENT }}",
+            "clientSecret": "${{ secrets.AML_SP_SECRET }}",
+            "subscriptionId": "${{ secrets.AML_SUBSCRIPTION_ID }}",
+            "tenantId": "${{ secrets.AML_TENANT_ID }}"
+          }'
+      - name: "[Setup] Set default AML workspace"
+        run: az configure --defaults workspace="${{ vars.AML_WORKSPACE_NAME }}" group="${{ vars.AML_RG_NAME }}"
+      - name: "[Setup] Checkout repo"
+        uses: actions/checkout@v4
+
+
+      ##########################################
+      ##  Invoke batch endpoint & deployment  ##
+      ##########################################
+      - name: "Invoke batch endpoint"
+        if: ${{ inputs.action == 'incoke'}}
+        run: |
+          # Simulate as if 2016 was current year
+          year="2016"
+          month=$(date +"%m")
+          day=$(date +"%d")
+          hour=$(date +"%H")
+          filepath="daily_data/$year/$month/$day/$hour/"
+          filename="$year$month$day_$hour.csv"
+          az ml batch-endpoint invoke --name energy-demand-batch-endpoint \
+            --input-type uri_folder 
+            --input azureml://datastores/data/paths/energy_demand_azuremlexamples/$filepath/$filename
+            --output_path azureml://datastores/data/paths/energy_preds/$filepath/preds_$filename
+            --debug

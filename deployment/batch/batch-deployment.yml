@@ -1,0 +1,18 @@
+$schema: https://azuremlschemas.azureedge.net/latest/batchDeployment.schema.json
+name: batch-dp
+endpoint_name: energy-demand-batch-endpoint
+# type: model
+model: azureml:energy-model@latest
+compute: azureml:cpu-cluster
+resources:
+  instance_count: 2
+# settings:  # CLI 2.20?
+max_concurrency_per_instance: 2
+mini_batch_size: 2
+output_action: append_row
+output_file_name: predictions.csv
+retry_settings:
+  max_retries: 3
+  timeout: 300
+error_threshold: -1
+logging_level: info
