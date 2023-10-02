@@ -1,0 +1,53 @@
+name: invoke-online-inference
+
+on:
+  workflow_dispatch:
+  schedule:  # UTC
+    - cron: "21 * * * *"  # min hour dom month dow
+
+jobs:
+
+  request_online_inference:
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+
+      #############
+      ##  Setup  ##
+      #############
+      - name: "[Setup] Install CLI ml 2.19.1"
+        run: |
+          az extension add --name ml --version 2.19.1 -y
+      - name: "[Setup] Azure login"
+        uses: azure/login@v1
+        with:
+          creds: '{
+            "clientId": "${{ secrets.AML_SP_CLIENT }}",
+            "clientSecret": "${{ secrets.AML_SP_SECRET }}",
+            "subscriptionId": "${{ secrets.AML_SUBSCRIPTION_ID }}",
+            "tenantId": "${{ secrets.AML_TENANT_ID }}"
+          }'
+      - name: "[Setup] Set default AML workspace"
+        run: az configure --defaults workspace="${{ vars.AML_WORKSPACE_NAME }}" group="${{ vars.AML_RG_NAME }}"
+      - name: "[Setup] Checkout repo"
+        uses: actions/checkout@v4
+
+
+      ##################################################
+      ##  Invoke online inference (realtime request)  ##
+      ##################################################
+      - name: "Invoke online endpoint"
+        run: |
+          # Real time prediction with example request body
+          az ml online-endpoint invoke \
+            --name energy-demand-online-endpoint --deployment-name blue-dp \
+            --request-file deployment/online/energy-request-example.json \
+            --debug
+
+      - name: "Invoke online endpoint - deployment v2"
+        run: |
+          # Real time prediction with example request body
+          az ml online-endpoint invoke \
+            --name energy-demand-online-endpoint --deployment-name defstore-dp \
+            --request-file deployment/online/energy-request-example.json \
+            --debug
