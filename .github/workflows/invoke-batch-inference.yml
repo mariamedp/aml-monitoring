@@ -2,8 +2,8 @@ name: invoke-batch-inference
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "30 23 * * *"  # min hour dom month dow
+  schedule:  # UTC
+    - cron: "30 9 * * *"  # min hour dom month dow
 
 jobs:
 
@@ -38,10 +38,10 @@ jobs:
       ##########################################
       - name: "Invoke batch endpoint"
         run: |
-          # Simulate as if 2016 was current year
+          # Make predictions for tomorrow - simulating as if 2016 was current year
           year="2016"
-          month=$(date +"%m")
-          day=$(date +"%d")
+          month=$(date -d "+1 day" +"%m")
+          day=$(date -d "+1 day" +"%d")
           filepath="$year/$month/$day"
           filename=$year$month$day".csv"
           datapath="azureml://datastores/data/paths/energy_demand_azuremlexamples"
@@ -49,5 +49,5 @@ jobs:
             --name energy-demand-batch-endpoint --deployment-name batch-dp \
             --input-type uri_folder \
             --input $datapath/daily_features_data/$filepath/energy_features_$filename \
-            --output-path $datapath/daily_preds/$filepath/energy_preds_$filename \
+            --output-path $datapath/daily_preds/$filepath \
             --debug
