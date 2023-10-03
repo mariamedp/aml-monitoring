@@ -7,7 +7,7 @@ on:
         description: "CLI ml extension version"
         type: string
         required: false
-        default: 2.19.1
+        default: 2.20.0
 
 
 jobs:

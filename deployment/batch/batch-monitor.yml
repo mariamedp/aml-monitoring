@@ -16,6 +16,10 @@ create_monitor:
     instance_type: "standard_e4s_v3"  # Spark compute for monitoring job
     runtime_version: "3.2"
 
+  # alert_notification:
+  #   emails:
+  #     - asd@asd.com
+
   monitoring_signals:
 
     ########################
@@ -23,26 +27,42 @@ create_monitor:
     ########################
     batch_prediction_drift:
       type: prediction_drift
-      target_dataset:
-         dataset:
-            input_dataset:
-               path: azureml:energy-batch-preds:1
-               type: uri_folder
-            dataset_context: model_outputs
-            pre_processing_component: azureml:custom_preprocessor:1.0.0
-      baseline_dataset:
-        input_dataset:
+      production_data:
+        input_data:
+          path: azureml:energy-batch-preds:1
+          type: uri_folder
+        data_context: model_outputs
+        pre_processing_component: azureml:batch_monitoring_preprocessor:1.0.2
+      reference_data:
+        input_data:
           path: azureml:energy-demand-training:1
           type: uri_folder
-        dataset_context: test
-        pre_processing_component: azureml:custom_preprocessor:1.0.0
+        data_context: validation
+        # pre_processing_component: azureml:custom_preprocessor:1.0.0
       metric_thresholds:
-        - applicable_feature_type: numerical
-          metric_name: jensen_shannon_distance
-          threshold: 0.01
-        - applicable_feature_type: categorical
-          metric_name: pearsons_chi_squared_test
-          threshold: 0.02
+        numerical:
+          jensen_shannon_distance: 0.01
+        categorical:
+          pearsons_chi_squared_test: 0.02
+
+    # # From docs:
+    # advanced_prediction_drift: # monitoring signal name, any user defined name works
+    #   type: prediction_drift
+    #   # define target dataset with your collected data
+    #   production_data:
+    #     input_data:
+    #       path: azureml:my_production_inference_data_model_outputs:1  # your collected data is registered as Azure Machine Learning asset
+    #       type: uri_folder
+    #     data_context: model_outputs
+    #     pre_processing_component: azureml:production_data_preprocessing:1
+    #   reference_data:
+    #     input_data:
+    #       path: azureml:my_model_validation_data:1 # use training data as comparison baseline
+    #       type: mltable
+    #     data_context: validation
+    #   metric_thresholds:
+    #     categorical:
+    #       pearsons_chi_squared_test: 0.02
 
 
     ########################
@@ -67,6 +87,31 @@ create_monitor:
     #       metric_name: pearsons_chi_squared_test
     #       threshold: 0.02
 
+    # # From docs:
+    # advanced_data_drift: # monitoring signal name, any user defined name works
+    #   type: data_drift
+    #   # define target dataset with your collected data
+    #   production_data:
+    #     input_data:
+    #       path: azureml:my_production_inference_data_model_inputs:1  # your collected data is registered as Azure Machine Learning asset
+    #       type: uri_folder
+    #     data_context: model_inputs
+    #     pre_processing_component: azureml:production_data_preprocessing:1
+    #   reference_data:
+    #     input_data:
+    #       path: azureml:my_model_training_data:1 # use training data as comparison baseline
+    #       type: mltable
+    #     data_context: training
+    #     target_column_name: is_fraud
+    #   features: 
+    #     top_n_feature_importance: 20 # monitor drift for top 20 features
+    #   metric_thresholds:
+    #     numberical:
+    #       jensen_shannon_distance: 0.01
+    #     categorical:
+    #       pearsons_chi_squared_test: 0.02
+
+
     ########################
     ##    Data quality    ##
     ########################
@@ -84,6 +129,27 @@ create_monitor:
     #     - applicable_feature_type: categorical
     #       metric_name: out_of_bounds_rate
     #       threshold: 0.05
+
+    # # From docs:
+    # advanced_data_quality:
+    #   type: data_quality
+    #   production_data:
+    #     input_data:
+    #       path: azureml:my_production_inference_data_model_inputs:1  # your collected data is registered as Azure Machine Learning asset
+    #       type: uri_folder
+    #     data_context: model_inputs
+    #     pre_processing_component: azureml:production_data_preprocessing:1
+    #   reference_data:
+    #     input_data:
+    #       path: azureml:my_model_training_data:1
+    #       type: mltable
+    #     data_context: training
+    #   metric_thresholds:
+    #     numerical:
+    #       null_value_rate: 0.03
+    #     categorical:
+    #       out_of_bounds_rate: 0.03
+
 
     ###########################
     ##  Feature attribution  ##
@@ -107,12 +173,34 @@ create_monitor:
     #   metric_thresholds:
     #      threshold: 0.9
 
-      # features: # monitor data quality for 3 individual features only
-      #   - feature_A
-      #   - feature_B
-      #   - feature_C
-
-
-  # alert_notification:
-  #   emails:
-  #     - asd@asd.com
+    # # From docs:
+    # feature_attribution_drift_signal:
+    #   type: feature_attribution_drift
+    #   production_data:
+    #   # using production_data collected outside of Azure Machine Learning
+    #     - input_data:
+    #         path: azureml:my_model_inputs:1
+    #         type: uri_folder
+    #       data_context: model_inputs
+    #       data_column_names:
+    #         correlation_id: correlation_id
+    #       pre_processing_component: azureml:model_inputs_preprocessing
+    #       data_window_size: P30D
+    #     - input_data:
+    #         path: azureml:my_model_outputs:1
+    #         type: uri_folder
+    #       data_context: model_outputs
+    #       data_column_names:
+    #         correlation_id: correlation_id
+    #         prediction: is_fraund
+    #         prediction_probability: is_fraund_probability
+    #       pre_processing_component: azureml:model_outputs_preprocessing
+    #       data_window_size: P30D
+    #   reference_data:
+    #       input_data:
+    #          path: azureml:my_model_training_data:1
+    #          type: mltable
+    #       data_context: training
+    #       target_column_name: is_fraud
+    #   metric_thresholds:
+    #     normalized_discounted_cumulative_gain: 0.9
