@@ -41,7 +41,7 @@ jobs:
       #############################
       ##  Deploy batch monitor  ##
       #############################
-      # - name: "Deploy dataprep component"
-      #   run: az ml component create --file $GITHUB_WORKSPACE/deployment/batch/monitoring-dataprep-component.yml --debug
+      - name: "Deploy dataprep component"
+        run: az ml component create --file $GITHUB_WORKSPACE/deployment/batch/monitoring-dataprep-component.yml --debug
       - name: "Deploy monitor"
         run: az ml schedule create --file $GITHUB_WORKSPACE/deployment/batch/batch-monitor.yml --debug

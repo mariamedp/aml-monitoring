@@ -3,7 +3,7 @@ type: spark
 
 name: batch_monitoring_preprocessor
 description: Custom preprocessor for batch monitoring
-version: 1.0.2
+version: 1.0.3
 is_deterministic: true
 
 code: .
@@ -17,7 +17,7 @@ inputs:
     type: string
   input_data:
     type: uri_folder
-    mode: direct
+    mode: ro_mount
 outputs:
   preprocessed_input_data:
     type: mltable

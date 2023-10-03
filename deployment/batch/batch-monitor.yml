@@ -32,7 +32,7 @@ create_monitor:
           path: azureml:energy-batch-preds:1
           type: uri_folder
         data_context: model_outputs
-        pre_processing_component: azureml:batch_monitoring_preprocessor:1.0.2
+        pre_processing_component: azureml:batch_monitoring_preprocessor:1.0.3
       reference_data:
         input_data:
           path: azureml:energy-demand-training:1
