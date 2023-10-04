@@ -3,7 +3,7 @@ type: spark
 
 name: batch_monitoring_preprocessor
 description: Custom preprocessor for batch monitoring
-version: 1.0.5
+version: 1.0.11
 is_deterministic: true
 
 code: .
