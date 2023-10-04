@@ -14,7 +14,7 @@ def main(data_path, model_path):
     mlflow.sklearn.autolog()
 
     print("Reading training data...")
-    data_file = os.path.join(data_path, 'energydemand_2012-2016.csv')
+    data_file = os.path.join(data_path, 'energydemand_2012-2015.csv')
     data_raw = pd.read_csv(data_file)
 
     print("Data preparation...")

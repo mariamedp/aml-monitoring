@@ -32,12 +32,13 @@ create_monitor:
           path: azureml:energy-batch-preds:1
           type: uri_folder
         data_context: model_outputs
-        pre_processing_component: azureml:batch_monitoring_preprocessor:1.0.11
+        pre_processing_component: azureml:batch_monitoring_preprocessor:1.0.12
       reference_data:
         input_data:
-          path: azureml:energy-demand-training:1
+          path: azureml:energy-demand-training:2
           type: uri_folder
-        data_context: validation
+        data_context: training
+        target_column_name: demand
         # pre_processing_component: azureml:custom_preprocessor:1.0.0
       metric_thresholds:
         numerical:
@@ -68,24 +69,25 @@ create_monitor:
     ########################
     ##     Data drift     ##
     ########################
-    # batch_data_drift: # monitoring signal name, any user defined name works
-    #   type: data_drift
-    #   # target_dataset is optional. By default target dataset is the production inference data associated with Azure Machine Learning online endpoint
-    #   baseline_dataset:
-    #     input_dataset:
-    #       path: azureml:my_model_training_data:1 # use training data as comparison baseline
-    #       type: mltable
-    #     dataset_context: training
-    #     target_column_name: fraud_detected
-    #   features: 
-    #     top_n_feature_importance: 20 # monitor drift for top 20 features
-    #   metric_thresholds:
-    #     - applicable_feature_type: numerical
-    #       metric_name: jensen_shannon_distance
-    #       threshold: 0.01
-    #     - applicable_feature_type: categorical
-    #       metric_name: pearsons_chi_squared_test
-    #       threshold: 0.02
+    batch_data_drift:
+      type: data_drift
+      production_data:
+        input_data:
+          path: azureml:energy-batch-features:1
+          type: uri_folder
+        data_context: model_inputs
+        # pre_processing_component: azureml:custom_preprocessor:1.0.0
+      reference_data:
+        input_data:
+          path: azureml:energy-demand-training:2
+          type: uri_folder
+        data_context: training
+        # pre_processing_component: azureml:custom_preprocessor:1.0.0
+      metric_thresholds:
+        numerical:
+          jensen_shannon_distance: 0.01
+        categorical:
+          pearsons_chi_squared_test: 0.02
 
     # # From docs:
     # advanced_data_drift: # monitoring signal name, any user defined name works
@@ -115,20 +117,23 @@ create_monitor:
     ########################
     ##    Data quality    ##
     ########################
-    # advanced_data_quality:
-    #   type: data_quality
-    #   baseline_dataset:
-    #     input_dataset:
-    #       path: azureml:energy-demand-training:1
-    #       type: uri_folder
-    #     dataset_context: training
-    #   metric_thresholds:
-    #     - applicable_feature_type: numerical
-    #       metric_name: null_value_rate
-    #       threshold: 0.05
-    #     - applicable_feature_type: categorical
-    #       metric_name: out_of_bounds_rate
-    #       threshold: 0.05
+    advanced_data_quality:
+      type: data_quality
+      production_data:
+        input_data:
+          path: azureml:energy-batch-features:1
+          type: uri_folder
+        data_context: model_inputs
+      reference_data:
+        input_data:
+          path: azureml:energy-demand-training:2
+          type: uri_folder
+        data_context: training
+      metric_thresholds:
+        numerical:
+          null_value_rate: 0.05
+        categorical:
+          out_of_bounds_rate: 0.05
 
     # # From docs:
     # advanced_data_quality:

@@ -1,15 +1,7 @@
-"""Entry script for Model Data Collector Data Window Component."""
-
 import os
 import argparse
-import pandas as pd
-from pyspark.sql import SparkSession, functions as f
 
-import mltable
-# import tempfile
-# from azureml.fsspec import AzureMachineLearningFileSystem
-# from datetime import datetime
-# from dateutil import parser
+from pyspark.sql import SparkSession, functions as f
 
 
 def main(data_window_start, data_window_end, input_data_uri, output_data_uri):
@@ -33,13 +25,12 @@ def main(data_window_start, data_window_end, input_data_uri, output_data_uri):
     output_sdf = (input_preds_sdf
         .filter(f.col('timestamp') >= custom_window_start)
         .filter(f.col('timestamp') <= custom_window_end)
-        .select('prediction')
+        .select('prediction').alias('demand')  # Target variable name as in training data
     )
     print(f"Rows after filtering: {output_sdf.count()}")
     print("Schema:")
     print(output_sdf, "\n")
 
-    # output_sdf.write.option('output_format', 'parquet').option('overwrite', True).mltable(output_data_uri)
     output_sdf.write.format('parquet').option('overwrite', True).mltable(output_data_uri)
 
     print("Finished.")
