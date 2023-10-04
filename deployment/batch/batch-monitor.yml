@@ -13,8 +13,8 @@ trigger:
 create_monitor:
 
   compute:
-    instance_type: "standard_e4s_v3"  # Spark compute for monitoring job
-    runtime_version: "3.2"
+    instance_type: "standard_e8s_v3"  # Spark compute for monitoring job
+    runtime_version: "3.3"
 
   # alert_notification:
   #   emails:
@@ -32,14 +32,14 @@ create_monitor:
           path: azureml:energy-batch-preds:1
           type: uri_folder
         data_context: model_outputs
-        pre_processing_component: azureml:batch_monitoring_preprocessor:1.0.12
+        pre_processing_component: azureml:batch_monitoring_preprocessor_preds:0.0.1
       reference_data:
         input_data:
           path: azureml:energy-demand-training:2
           type: uri_folder
         data_context: training
         target_column_name: demand
-        # pre_processing_component: azureml:custom_preprocessor:1.0.0
+        pre_processing_component: azureml:batch_monitoring_preprocessor_train:0.0.1
       metric_thresholds:
         numerical:
           jensen_shannon_distance: 0.01
@@ -76,13 +76,13 @@ create_monitor:
           path: azureml:energy-batch-features:1
           type: uri_folder
         data_context: model_inputs
-        # pre_processing_component: azureml:custom_preprocessor:1.0.0
+        pre_processing_component: azureml:batch_monitoring_preprocessor_feats:0.0.3
       reference_data:
         input_data:
           path: azureml:energy-demand-training:2
           type: uri_folder
         data_context: training
-        # pre_processing_component: azureml:custom_preprocessor:1.0.0
+        pre_processing_component: azureml:batch_monitoring_preprocessor_train:0.0.1
       metric_thresholds:
         numerical:
           jensen_shannon_distance: 0.01
@@ -124,11 +124,13 @@ create_monitor:
           path: azureml:energy-batch-features:1
           type: uri_folder
         data_context: model_inputs
+        pre_processing_component: azureml:batch_monitoring_preprocessor_feats:0.0.3
       reference_data:
         input_data:
           path: azureml:energy-demand-training:2
           type: uri_folder
         data_context: training
+        pre_processing_component: azureml:batch_monitoring_preprocessor_train:0.0.1
       metric_thresholds:
         numerical:
           null_value_rate: 0.05

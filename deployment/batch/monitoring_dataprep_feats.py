@@ -7,11 +7,11 @@ from pyspark.sql import SparkSession, functions as f
 def main(data_window_start, data_window_end, input_data_uri, output_data_uri):
     print("main")
 
-    # Read batch predictions data
-    input_preds_sdf = read_input_predictions(input_data_uri)
-    print(f"Total rows processed: {input_preds_sdf.count()}")
+    # Read batch features data
+    input_feats_sdf = read_input_featuresdata(input_data_uri)
+    print(f"Total rows processed: {input_feats_sdf.count()}")
     print("Schema:")
-    print(input_preds_sdf, "\n")
+    print(input_feats_sdf, "\n")
 
     # Window start/end in ISO8601 format, example: '2023-10-03T13:12:52.037534Z'
     # Simulate like it's 2016 - same as use case data
@@ -22,10 +22,9 @@ def main(data_window_start, data_window_end, input_data_uri, output_data_uri):
     print(f'Window end: {data_window_end} => {custom_window_end}')
 
     # Filter window
-    output_sdf = (input_preds_sdf
+    output_sdf = (input_feats_sdf
         .filter(f.col('timestamp') >= custom_window_start)
         .filter(f.col('timestamp') <= custom_window_end)
-        .select('prediction').alias('demand')  # Target variable name as in training data
     )
     print(f"Rows after filtering: {output_sdf.count()}")
     print("Schema:")
@@ -36,22 +35,19 @@ def main(data_window_start, data_window_end, input_data_uri, output_data_uri):
     print("Finished.")
 
 
-def read_input_predictions(input_data_uri):
+def read_input_featuresdata(input_data_uri):
 
-    preds_sdf = (spark
-        .read.format('text')
-        .load(f'{input_data_uri}/*/*/*/predictions.csv')
-        .withColumn('value', f.from_json(f.col('value'), schema='array<string>'))
+    feats_sdf = (spark
+        .read.format('csv')
+        .option('header', 'true')
+        .load(f'{input_data_uri}/*/*/*/*.csv')
         .withColumn('filepath', f.input_file_name())
-        .withColumn('dirpath', f.regexp_extract(f.col('filepath'), f'{input_data_uri}(.*)/predictions.csv', 1))
-        .select(
-            f.to_timestamp(f.col('dirpath'), format='yyyy/MM/dd').alias('timestamp'),
-            f.col('value')[0].alias('inputfile'),
-            f.col('value')[1].astype('float').alias('prediction')
-        )
+        .withColumn('dirpath', f.regexp_extract(f.col('filepath'), f'{input_data_uri}(.*)/energy_features_.*.csv', 1))
+        .withColumn('timestamp', f.to_timestamp(f.col('dirpath'), format='yyyy/MM/dd'))
+        .drop('filepath', 'dirpath')
     )
 
-    return preds_sdf
+    return feats_sdf
 
 
 def parse_args(args_list=None):
@@ -66,21 +62,9 @@ def parse_args(args_list=None):
 
 if __name__ == '__main__':
 
-    import sys
-    print(sys.argv)
-    print("----------")
     args = parse_args()
-    print(args)
-    print("----------")
-    print(os.listdir())
-    print("----------")
-
-    import pyspark
-    print(">>> pyspark version:")
-    print(pyspark.__version__)
 
     spark = SparkSession.builder.appName("monitoringdataprep").getOrCreate()
-    print(spark)
 
     main(
         data_window_start=args.data_window_start,
