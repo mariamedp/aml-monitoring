@@ -1,139 +1,99 @@
-# Copyright (c) Microsoft Corporation.
-# Licensed under the MIT License.
-
 """Entry script for Model Data Collector Data Window Component."""
 
+import os
 import argparse
 import pandas as pd
+from pyspark.sql import SparkSession, functions as f
+
 import mltable
-import tempfile
-from azureml.fsspec import AzureMachineLearningFileSystem
-from datetime import datetime
-from dateutil import parser
-from pyspark.sql import SparkSession
+# import tempfile
+# from azureml.fsspec import AzureMachineLearningFileSystem
+# from datetime import datetime
+# from dateutil import parser
 
 
-def init_spark():
-    """Get or create spark session."""
-    spark = SparkSession.builder.appName("AccessParquetFiles").getOrCreate()
-    return spark
+def main(data_window_start, data_window_end, input_data_uri, output_data_uri):
+    print("main")
 
+    # Read batch predictions data
+    input_preds_sdf = read_input_predictions(input_data_uri)
+    print(f"Total rows processed: {input_preds_sdf.count()}")
+    print("Schema:")
+    print(input_preds_sdf, "\n")
 
-def read_mltable_in_spark(mltable_path: str):
-    """Read mltable in spark."""
-    spark = init_spark()
-    df = spark.read.mltable(mltable_path)
-    return df
+    # Window start/end in ISO8601 format, example: '2023-10-03T13:12:52.037534Z'
+    # Simulate like it's 2016 - same as use case data
+    # Take date only bc predictions are scheduled daily - #TODO configure in monitor directly
+    custom_window_start = f'2016-{data_window_start[5:10]} 00:00:00'
+    custom_window_end = f'2016-{data_window_end[5:10]} 00:00:00'
+    print(f'Window start: {data_window_start} => {custom_window_start}')
+    print(f'Window end: {data_window_end} => {custom_window_end}')
 
-
-def save_spark_df_as_mltable(metrics_df, folder_path: str):
-    """Save spark dataframe as mltable."""
-    metrics_df.write.option("output_format", "parquet").option(
-        "overwrite", True
-    ).mltable(folder_path)
-
-
-def preprocess(
-    data_window_start: str,
-    data_window_end: str,
-    input_data: str,
-    preprocessed_input_data: str,
-):
-    """Extract data based on window size provided and preprocess it into MLTable.
-
-    Args:
-        production_data: The data asset on which the date filter is applied.
-        monitor_current_time: The current time of the window (inclusive).
-        window_size_in_days: Number of days from current time to start time window (exclusive).
-        preprocessed_data: The mltable path pointing to location where the outputted mltable will be written to.
-    """
-    format_data = "%Y-%m-%d %H:%M:%S"
-    start_datetime = parser.parse(data_window_start)
-    start_datetime = datetime.strptime(
-        str(start_datetime.strftime(format_data)), format_data
+    # Filter window
+    output_sdf = (input_preds_sdf
+        .filter(f.col('timestamp') >= custom_window_start)
+        .filter(f.col('timestamp') <= custom_window_end)
+        .select('prediction')
     )
+    print(f"Rows after filtering: {output_sdf.count()}")
+    print("Schema:")
+    print(output_sdf, "\n")
 
-    # TODO Validate window size
-    end_datetime = parser.parse(data_window_end)
-    end_datetime = datetime.strptime(
-        str(end_datetime.strftime(format_data)), format_data
-    )
+    # output_sdf.write.option('output_format', 'parquet').option('overwrite', True).mltable(output_data_uri)
+    output_sdf.write.format('parquet').option('overwrite', True).mltable(output_data_uri)
 
-    # Create mltable, create column with partitionFormat
-    # Extract partition format
-    table = mltable.from_json_lines_files(
-        paths=[{"pattern": f"{input_data}**/*.jsonl"}]
-    )
-    # Uppercase HH for hour info
-    partitionFormat = "{PartitionDate:yyyy/MM/dd/HH}/{fileName}.jsonl"
-    table = table.extract_columns_from_partition_format(partitionFormat)
+    print("Finished.")
 
-    # Filter on partitionFormat based on user data window
-    filterStr = f"PartitionDate >= datetime({start_datetime.year}, {start_datetime.month}, {start_datetime.day}, {start_datetime.hour}) and PartitionDate <= datetime({end_datetime.year}, {end_datetime.month}, {end_datetime.day}, {end_datetime.hour})"  # noqa
-    table = table.filter(filterStr)
 
-    # Data column is a list of objects, convert it into string because spark.read_json cannot read object
-    table = table.convert_column_types({"data": mltable.DataType.to_string()})
+def read_input_predictions(input_data_uri):
 
-    # Create MLTable in different location
-    save_path = tempfile.mktemp()
-    table.save(save_path)
-
-    # Save preprocessed_data MLTable to temp location
-    des_path = preprocessed_input_data + "temp"
-    fs = AzureMachineLearningFileSystem(des_path)
-    print("MLTable path:", des_path)
-    # TODO: Evaluate if we need to overwrite
-    fs.upload(
-        lpath=save_path,
-        rpath="",
-        **{"overwrite": "MERGE_WITH_OVERWRITE"},
-        recursive=True,
-    )
-
-    # Read mltable from preprocessed_data
-    df = read_mltable_in_spark(mltable_path=des_path)
-
-    if df.count() == 0:
-        raise Exception(
-            "The window for this current run contains no data. "
-            + "Please visit aka.ms/mlmonitoringhelp for more information."
+    preds_sdf = (spark
+        .read.format('text')
+        .load(f'{input_data_uri}/*/*/*/predictions.csv')
+        .withColumn('value', f.from_json(f.col('value'), schema='array<string>'))
+        .withColumn('filepath', f.input_file_name())
+        .withColumn('dirpath', f.regexp_extract(f.col('filepath'), f'{input_data_uri}(.*)/predictions.csv', 1))
+        .select(
+            f.to_timestamp(f.col('dirpath'), format='yyyy/MM/dd').alias('timestamp'),
+            f.col('value')[0].alias('inputfile'),
+            f.col('value')[1].astype('float').alias('prediction')
         )
-
-    # Output MLTable
-    first_data_row = df.select("data").rdd.map(lambda x: x).first()
-
-    spark = init_spark()
-    data_as_df = spark.createDataFrame(pd.read_json(first_data_row["data"]))
-
-    def tranform_df_function(iterator):
-        for df in iterator:
-            yield pd.concat(pd.read_json(entry) for entry in df["data"])
-
-    transformed_df = df.select("data").mapInPandas(
-        tranform_df_function, schema=data_as_df.schema
     )
 
-    save_spark_df_as_mltable(transformed_df, preprocessed_input_data)
+    return preds_sdf
 
 
-def run():
-    """Compute data window and preprocess data from MDC."""
-    # Parse arguments
+def parse_args(args_list=None):
     parser = argparse.ArgumentParser()
-    parser.add_argument("--data_window_start", type=str)
-    parser.add_argument("--data_window_end", type=str)
-    parser.add_argument("--input_data", type=str)
-    parser.add_argument("--preprocessed_input_data", type=str)
-    args = parser.parse_args()
+    parser.add_argument("--data-window-start", type=str, help="Data window start-time in ISO8601 format")
+    parser.add_argument("--data-window-end", type=str, help="Data window end-time in ISO8601 format")
+    parser.add_argument("--input-data-uri", type=str, help="Production inference data registered as data asset")
+    parser.add_argument("--output-data-uri", type=str, help="Tabular dataset, which matches a subset of baseline data schema.")
+    args_parsed = parser.parse_args(args_list)
+    return args_parsed
 
-    preprocess(
-        args.data_window_start,
-        args.data_window_end,
-        args.input_data,
-        args.preprocessed_input_data,
+
+if __name__ == '__main__':
+
+    import sys
+    print(sys.argv)
+    print("----------")
+    args = parse_args()
+    print(args)
+    print("----------")
+    print(os.listdir())
+    print("----------")
+
+    import pyspark
+    print(">>> pyspark version:")
+    print(pyspark.__version__)
+
+    spark = SparkSession.builder.appName("monitoringdataprep").getOrCreate()
+    print(spark)
+
+    main(
+        data_window_start=args.data_window_start,
+        data_window_end=args.data_window_end,
+        input_data_uri=args.input_data_uri,
+        output_data_uri=args.output_data_uri,
     )
-
-
-if __name__ == "__main__":
-    run()

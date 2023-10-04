@@ -1,10 +1,9 @@
 $schema: http://azureml/sdk-2-0/SparkComponent.json
 type: spark
 
-name: custom_preprocessor
-display_name: My Custom Preprocessor
-description: Filters the data based on the window provided.
-version: 1.0.0
+name: batch_monitoring_preprocessor
+description: Custom preprocessor for batch monitoring
+version: 1.0.11
 is_deterministic: true
 
 code: .
@@ -23,6 +22,13 @@ outputs:
   preprocessed_input_data:
     type: mltable
     mode: direct
+
+args: >-
+  --data-window-start ${{inputs.data_window_start}}
+  --data-window-end ${{inputs.data_window_end}}
+  --input-data-uri ${{inputs.input_data}}
+  --output-data-uri ${{outputs.preprocessed_input_data}}
+
 conf:
   spark.driver.cores: 1
   spark.driver.memory: 2g
@@ -46,8 +52,3 @@ conf:
         - azureml-fsspec
         - fsspec~=2023.4.0
     name: momo-base-spark
-args: >-
-  --data_window_end ${{inputs.data_window_end}}
-  --data_window_start ${{inputs.data_window_start}}
-  --input_data ${{inputs.input_data}}
-  --preprocessed_input_data ${{outputs.preprocessed_input_data}}
