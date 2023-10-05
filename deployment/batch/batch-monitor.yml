@@ -35,11 +35,13 @@ create_monitor:
         pre_processing_component: azureml:batch_monitoring_preprocessor_preds:0.0.1
       reference_data:
         input_data:
-          path: azureml:energy-demand-training:2
-          type: uri_folder
+          # path: azureml:energy-demand-training:2
+          # type: uri_folder
+          path: azureml:energy-demand-training-mltable:1
+          type: mltable
         data_context: training
         target_column_name: demand
-        pre_processing_component: azureml:batch_monitoring_preprocessor_train:0.0.1
+        # pre_processing_component: azureml:batch_monitoring_preprocessor_train:0.0.1  # Not working atm
       metric_thresholds:
         numerical:
           jensen_shannon_distance: 0.01
@@ -76,13 +78,15 @@ create_monitor:
           path: azureml:energy-batch-features:1
           type: uri_folder
         data_context: model_inputs
-        pre_processing_component: azureml:batch_monitoring_preprocessor_feats:0.0.3
+        pre_processing_component: azureml:batch_monitoring_preprocessor_feats:0.0.4
       reference_data:
         input_data:
-          path: azureml:energy-demand-training:2
-          type: uri_folder
+          # path: azureml:energy-demand-training:2
+          # type: uri_folder
+          path: azureml:energy-demand-training-mltable:1
+          type: mltable
         data_context: training
-        pre_processing_component: azureml:batch_monitoring_preprocessor_train:0.0.1
+        # pre_processing_component: azureml:batch_monitoring_preprocessor_train:0.0.1
       metric_thresholds:
         numerical:
           jensen_shannon_distance: 0.01
@@ -124,13 +128,15 @@ create_monitor:
           path: azureml:energy-batch-features:1
           type: uri_folder
         data_context: model_inputs
-        pre_processing_component: azureml:batch_monitoring_preprocessor_feats:0.0.3
+        pre_processing_component: azureml:batch_monitoring_preprocessor_feats:0.0.4
       reference_data:
         input_data:
-          path: azureml:energy-demand-training:2
-          type: uri_folder
+          # path: azureml:energy-demand-training:2
+          # type: uri_folder
+          path: azureml:energy-demand-training-mltable:1
+          type: mltable
         data_context: training
-        pre_processing_component: azureml:batch_monitoring_preprocessor_train:0.0.1
+        # pre_processing_component: azureml:batch_monitoring_preprocessor_train:0.0.1
       metric_thresholds:
         numerical:
           null_value_rate: 0.05

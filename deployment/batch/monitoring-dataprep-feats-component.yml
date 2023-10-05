@@ -3,7 +3,7 @@ type: spark
 
 name: batch_monitoring_preprocessor_feats
 description: Custom preprocessor for batch monitoring features data
-version: 0.0.3
+version: 0.0.4
 is_deterministic: true
 
 code: .
