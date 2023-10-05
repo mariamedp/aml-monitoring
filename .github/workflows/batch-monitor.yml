@@ -41,10 +41,10 @@ jobs:
       #############################
       ##  Deploy batch monitor  ##
       #############################
-      # - name: "Deploy preds dataprep component"
-      #   run: az ml component create --file $GITHUB_WORKSPACE/deployment/batch/monitoring-dataprep-preds-component.yml --debug
-      - name: "Deploy feats dataprep component"
-        run: az ml component create --file $GITHUB_WORKSPACE/deployment/batch/monitoring-dataprep-feats-component.yml --debug
+      - name: "Deploy preds dataprep component"
+        run: az ml component create --file $GITHUB_WORKSPACE/deployment/batch/monitoring-dataprep-preds-component.yml --debug
+      # - name: "Deploy feats dataprep component"
+      #   run: az ml component create --file $GITHUB_WORKSPACE/deployment/batch/monitoring-dataprep-feats-component.yml --debug
       # - name: "Deploy train dataprep component"
       #   run: az ml component create --file $GITHUB_WORKSPACE/deployment/batch/monitoring-dataprep-train-component.yml --debug
       - name: "Deploy monitor"

@@ -25,7 +25,7 @@ def main(data_window_start, data_window_end, input_data_uri, output_data_uri):
     output_sdf = (input_preds_sdf
         .filter(f.col('timestamp') >= custom_window_start)
         .filter(f.col('timestamp') <= custom_window_end)
-        .select('prediction').alias('demand')  # Target variable name as in training data
+        .select(f.col('prediction').alias('demand'))  # Target variable name as in training data
     )
     print(f"Rows after filtering: {output_sdf.count()}")
     print("Schema:")
