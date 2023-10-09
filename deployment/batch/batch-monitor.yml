@@ -32,12 +32,12 @@ create_monitor:
           path: azureml:energy-batch-preds:1
           type: uri_folder
         data_context: model_outputs
-        pre_processing_component: azureml:batch_monitoring_preprocessor_preds:0.0.2
+        pre_processing_component: azureml:batch_monitoring_preprocessor_preds:0.1.0
       reference_data:
         input_data:
           # path: azureml:energy-demand-training:2
           # type: uri_folder
-          path: azureml:energy-demand-training-mltable:1
+          path: azureml:energy-demand-training-mltable:2
           type: mltable
         data_context: training
         target_column_name: demand
@@ -78,12 +78,12 @@ create_monitor:
           path: azureml:energy-batch-features:1
           type: uri_folder
         data_context: model_inputs
-        pre_processing_component: azureml:batch_monitoring_preprocessor_feats:0.0.4
+        pre_processing_component: azureml:batch_monitoring_preprocessor_feats:0.1.0
       reference_data:
         input_data:
           # path: azureml:energy-demand-training:2
           # type: uri_folder
-          path: azureml:energy-demand-training-mltable:1
+          path: azureml:energy-demand-training-mltable:2
           type: mltable
         data_context: training
         # pre_processing_component: azureml:batch_monitoring_preprocessor_train:0.0.1
@@ -128,12 +128,12 @@ create_monitor:
           path: azureml:energy-batch-features:1
           type: uri_folder
         data_context: model_inputs
-        pre_processing_component: azureml:batch_monitoring_preprocessor_feats:0.0.4
+        pre_processing_component: azureml:batch_monitoring_preprocessor_feats:0.1.0
       reference_data:
         input_data:
           # path: azureml:energy-demand-training:2
           # type: uri_folder
-          path: azureml:energy-demand-training-mltable:1
+          path: azureml:energy-demand-training-mltable:2
           type: mltable
         data_context: training
         # pre_processing_component: azureml:batch_monitoring_preprocessor_train:0.0.1
@@ -167,24 +167,6 @@ create_monitor:
     ###########################
     ##  Feature attribution  ##
     ###########################
-    # feature_attribution_drift_signal:
-    #   type: feature_attribution_drift
-    #   target_dataset:
-    #      dataset:
-    #         input_dataset:
-    #            path: azureml:my_model_production_data:1
-    #            type: uri_folder
-    #         dataset_context: model_inputs_outputs
-    #   baseline_dataset:
-    #     input_dataset:
-    #       path: azureml:my_model_training_data:1
-    #       type: mltable
-    #     dataset_context: training
-    #     target_column_name: fraud_detected
-    #   model_type: classification
-    #   # if no metric_thresholds defined, use the default metric_thresholds
-    #   metric_thresholds:
-    #      threshold: 0.9
 
     # # From docs:
     # feature_attribution_drift_signal:

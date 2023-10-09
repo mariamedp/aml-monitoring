@@ -1,14 +1,14 @@
 $schema: http://azureml/sdk-2-0/SparkComponent.json
 type: spark
 
-name: batch_monitoring_preprocessor_train
-description: Custom preprocessor for batch monitoring training data
-version: 0.0.1
+name: batch_monitoring_preprocessor_feats
+description: Custom preprocessor for batch monitoring features data
+version: 0.1.0
 is_deterministic: true
 
 code: .
 entry:
-  file: monitoring_dataprep_train.py
+  file: dataprep_feats.py
 
 inputs:
   data_window_end:
@@ -30,11 +30,11 @@ args: >-
   --output-data-uri ${{outputs.preprocessed_input_data}}
 
 conf:
-  spark.driver.cores: 1
+  spark.driver.cores: 2
   spark.driver.memory: 2g
-  spark.executor.cores: 2
+  spark.executor.cores: 4
   spark.executor.memory: 2g
-  spark.executor.instances: 1
+  spark.executor.instances: 2
   spark.dynamicAllocation.enabled: True
   spark.dynamicAllocation.minExecutors: 1
   spark.dynamicAllocation.maxExecutors: 4

@@ -40,7 +40,7 @@ def read_input_featuresdata(input_data_uri):
     feats_sdf = (spark
         .read.format('csv')
         .option('header', 'true')
-        .load(f'{input_data_uri}/2014/01/*/*.csv')
+        .load(f'{input_data_uri}/2016/*/*/*.csv')  # Only 2016 is needed
         .withColumn('filepath', f.input_file_name())
         .withColumn('dirpath', f.regexp_extract(f.col('filepath'), f'{input_data_uri}(.*)/energy_features_.*.csv', 1))
         .withColumn('timestamp', f.to_timestamp(f.col('dirpath'), format='yyyy/MM/dd'))

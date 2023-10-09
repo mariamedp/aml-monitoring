@@ -1,14 +1,14 @@
 $schema: http://azureml/sdk-2-0/SparkComponent.json
 type: spark
 
-name: batch_monitoring_preprocessor_preds
-description: Custom preprocessor for batch monitoring predictions data
-version: 0.0.2
+name: batch_monitoring_preprocessor_train
+description: Custom preprocessor for batch monitoring training data
+version: 0.0.1
 is_deterministic: true
 
 code: .
 entry:
-  file: monitoring_dataprep_preds.py
+  file: dataprep_train.py
 
 inputs:
   data_window_end:
