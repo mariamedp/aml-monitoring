@@ -15,4 +15,5 @@ create_monitor:
     instance_type: "standard_e4s_v3"  # Spark compute for monitoring job
     runtime_version: "3.3"
   monitoring_target:
+    ml_task: regression
     endpoint_deployment_id: azureml:energy-demand-online-endpoint:blue-dp
