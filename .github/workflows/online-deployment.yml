@@ -52,19 +52,19 @@ jobs:
       - name: "Create endpoint"
         if: ${{ inputs.action == 'create'}}
         run: az ml online-endpoint create --file deployment/online/online-endpoint.yml --debug
-      - name: "Create deployment v1"
+      - name: "Create deployment v1 (custom MDC)"
         if: ${{ inputs.action == 'create'}}
         run: az ml online-deployment create --file deployment/online/online-deployment.yml --debug
-      - name: "Create deployment v2"
+      - name: "Create deployment v2 (default MDC)"
         if: ${{ inputs.action == 'create'}}
         run: az ml online-deployment create --file deployment/online/online-deployment-default-mdc.yml --debug
 
       - name: "Update endpoint"
         if: ${{ inputs.action == 'update'}}
         run: az ml online-endpoint update --file deployment/online/online-endpoint.yml --debug
-      - name: "Update deployment v1"
-        if: ${{ inputs.action == 'update'}}
-        run: az ml online-deployment update --file deployment/online/online-deployment.yml --debug
-      - name: "Update deployment v2"
+      - name: "Update deployment v2 (default MDC)"
         if: ${{ inputs.action == 'update'}}
         run: az ml online-deployment update --file deployment/online/online-deployment-default-mdc.yml --debug
+      - name: "Update deployment v1 (custom MDC)"
+        if: ${{ inputs.action == 'update'}}
+        run: az ml online-deployment update --file deployment/online/online-deployment.yml --debug
