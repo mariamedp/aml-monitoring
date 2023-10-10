@@ -13,7 +13,7 @@ trigger:
 create_monitor:
 
   compute:
-    instance_type: "standard_e8s_v3"  # Spark compute for monitoring job
+    instance_type: "standard_e2s_v3"  # Spark compute for monitoring job
     runtime_version: "3.3"
 
   # alert_notification:
