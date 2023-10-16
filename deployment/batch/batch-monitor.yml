@@ -37,7 +37,7 @@ create_monitor:
         input_data:
           # path: azureml:energy-demand-training:2
           # type: uri_folder
-          path: azureml:energy-demand-training-mltable:2
+          path: azureml:energy-demand-training-mltable:3
           type: mltable
         data_context: training
         target_column_name: demand
@@ -83,7 +83,7 @@ create_monitor:
         input_data:
           # path: azureml:energy-demand-training:2
           # type: uri_folder
-          path: azureml:energy-demand-training-mltable:2
+          path: azureml:energy-demand-training-mltable:3
           type: mltable
         data_context: training
         # pre_processing_component: azureml:batch_monitoring_preprocessor_train:0.0.1
@@ -133,7 +133,7 @@ create_monitor:
         input_data:
           # path: azureml:energy-demand-training:2
           # type: uri_folder
-          path: azureml:energy-demand-training-mltable:2
+          path: azureml:energy-demand-training-mltable:3
           type: mltable
         data_context: training
         # pre_processing_component: azureml:batch_monitoring_preprocessor_train:0.0.1

@@ -44,10 +44,10 @@ jobs:
             --request-file deployment/online/energy-request-example.json \
             --debug
 
-      - name: "Invoke online endpoint - deployment v2"
-        run: |
-          # Real time prediction with example request body
-          az ml online-endpoint invoke \
-            --name energy-demand-online-endpoint --deployment-name defstore-dp \
-            --request-file deployment/online/energy-request-example.json \
-            --debug
+      # - name: "Invoke online endpoint - deployment v2"
+      #   run: |
+      #     # Real time prediction with example request body
+      #     az ml online-endpoint invoke \
+      #       --name energy-demand-online-endpoint --deployment-name defstore-dp \
+      #       --request-file deployment/online/energy-request-example.json \
+      #       --debug
