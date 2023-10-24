@@ -2,8 +2,8 @@ name: invoke-online-inference
 
 on:
   workflow_dispatch:
-  schedule:  # UTC
-    - cron: "21 * * * *"  # min hour dom month dow
+  # schedule:  # UTC
+  #   - cron: "21 * * * *"  # min hour dom month dow
 
 jobs:
 
